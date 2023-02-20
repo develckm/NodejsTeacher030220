@@ -4,7 +4,7 @@ const querystring=require("querystring");
 const fs=require("fs/promises");
 const mysql=require("mysql");
 const mysql2=require("mysql2/promise") //mysql 을 프라미스화한 라이브러리
-
+const pug=require("pug");
 
 const mysqlConnInfo={
     host: "localhost",
@@ -55,6 +55,26 @@ server.on("request",async (req, res)=>{
         res.write(`<script>const deptList=${JSON.stringify(rows)};</script>`);//Object json 으로 변환
         res.write(data);
         //res.write("const deptList="+JSON.stringify(rows)+";");//Object json 으로 변환
+        res.end();
+    }else if(urlObj.pathname==="/deptListPug.do"){//node(pug),express(pug),톰캣(jsp),spring(thymeleaf)
+        try {
+            const conn=await mysql2.createConnection(mysqlConnInfo);
+            const [rows,fields]=await conn.query("SELECT * FROM DEPT");
+            let html=pug.renderFile("L05DeptList.pug",{deptList:rows});
+            //pug 문서에서 html 을 렌더링할때 Object 를 참조할 수 있다.
+            res.write(html);
+            res.end();
+        }catch (e) {
+            console.error(e);
+            res.setHeader("content-type","text/html;charset=UTF-8")
+            res.statusCode=500;
+            res.write("<h1>db나 렌더링에서 오류가 발생했습니다.다시 시도 500</h1>");
+            res.end();
+        }
+    }else {
+        res.setHeader("content-type","text/html;charset=UTF-8")
+        res.statusCode=404;
+        res.write("<h1>404 존재하지 않는 리소스 입니다.</h1>");
         res.end();
     }
 });
