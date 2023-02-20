@@ -71,7 +71,29 @@ server.on("request",async (req, res)=>{
             res.write("<h1>db나 렌더링에서 오류가 발생했습니다.다시 시도 500</h1>");
             res.end();
         }
+    }else if(urlObj.pathname==="/empListPug.do"){//node(pug),express(pug),톰캣(jsp),spring(thymeleaf)
+        try {
+            const conn=await mysql2.createConnection(mysqlConnInfo);
+            const [rows,fields]=await conn.query("SELECT * FROM EMP");
+            let html=pug.renderFile("L05EmpList.pug",{empList:rows});
+            //pug 문서에서 html 을 렌더링할때 Object 를 참조할 수 있다.
+            res.write(html);
+            res.end();
+        }catch (e) {
+            console.error(e);
+            res.setHeader("content-type","text/html;charset=UTF-8")
+            res.statusCode=500;
+            res.write("<h1>db나 렌더링에서 오류가 발생했습니다.다시 시도 500</h1>");
+            res.end();
+        }
+    }else if(urlObj.pathname==="/L05EmpDetail.do"){
+        const conn=await mysql2.createConnection(mysqlConnInfo);
+        const [rows,f]=await conn.query("SELECT * FROM EMP WHERE EMPNO=?",[params.empno])
+        let html=pug.renderFile("L05EmpDetail.pug",{emp:rows[0]});
+        res.write(html);
+        res.end();
     }else {
+
         res.setHeader("content-type","text/html;charset=UTF-8")
         res.statusCode=404;
         res.write("<h1>404 존재하지 않는 리소스 입니다.</h1>");

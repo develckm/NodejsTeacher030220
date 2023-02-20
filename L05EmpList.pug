@@ -1,0 +1,20 @@
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+    body
+        h1 사원리스트
+        table
+            thead
+                tr
+                    th 사번
+                    th 이름
+                    th 입사일
+                    th 부서번호
+            tbody
+                -for(let emp of empList)
+                    tr
+                        td
+                            a(href=`L05EmpDetail.do?empno=${emp.EMPNO}`)=emp.EMPNO
+                        td=emp.ENAME
+                        td=emp.HIREDATE.toLocaleString("ko-KR")
+                        td=emp.DEPTNO
