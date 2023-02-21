@@ -80,8 +80,13 @@ server.on("request",async (req, res)=>{
             }
             let sql="SELECT * FROM EMP WHERE EMPNO=?"; //? : preparedStatement
             const [rows,f]=await pool.query(sql,[empno]);
-            let html=pug.renderFile("./templates/empDetail.pug",{emp:rows[0]});
             //무조건 SELECT 의 결과는 배열이다.
+            if(rows.length==0){ //조회된 내역이 없을 때
+                res.writeHead(302,{location:"/empList.do"});
+                res.end();
+                return;
+            }
+            let html=pug.renderFile("./templates/empDetail.pug",{emp:rows[0]});
             res.write(html);
             res.end();
         }else if(urlObj.pathname==="/empUpdate.do"&&req.method==="GET"){
@@ -94,6 +99,11 @@ server.on("request",async (req, res)=>{
             }
             let sql="SELECT * FROM EMP WHERE EMPNO=?"; //? : preparedStatement
             const [rows,f]=await pool.query(sql,[empno]);
+            if(rows.length==0){
+                res.writeHead(302,{location:"/empList.do"});
+                res.end();
+                return;
+            }
             let html=pug.renderFile("./templates/empUpdate.pug",{emp:rows[0]});
             res.write(html);
             res.end();
