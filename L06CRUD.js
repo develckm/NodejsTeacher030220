@@ -76,12 +76,25 @@ server.on("request",async (req, res)=>{
                 res.statusCode=400;
                 res.write("<h1>해당 페이지 꼭 필요한 파라미터를 보내지 않았습니다! 400</h1>");
                 res.end();
-                //return; //응답이 완료되어도 밑에 코드가 실행될 수도 있어서 콜백함수을 종료함
-            }//12시 15분까지
+                return; //응답이 완료되어도 밑에 코드가 실행될 수도 있어서 콜백함수을 종료함
+            }
             let sql="SELECT * FROM EMP WHERE EMPNO=?"; //? : preparedStatement
             const [rows,f]=await pool.query(sql,[empno]);
             let html=pug.renderFile("./templates/empDetail.pug",{emp:rows[0]});
             //무조건 SELECT 의 결과는 배열이다.
+            res.write(html);
+            res.end();
+        }else if(urlObj.pathname==="/empUpdate.do"&&req.method==="GET"){
+            let empno=Number(params.empno);
+            if(Number.isNaN(empno)){
+                res.statusCode=400;
+                res.write("<h1>해당 페이지 꼭 필요한 파라미터를 보내지 않았습니다! 400</h1>");
+                res.end();
+                return;
+            }
+            let sql="SELECT * FROM EMP WHERE EMPNO=?"; //? : preparedStatement
+            const [rows,f]=await pool.query(sql,[empno]);
+            let html=pug.renderFile("./templates/empUpdate.pug",{emp:rows[0]});
             res.write(html);
             res.end();
         }else{
