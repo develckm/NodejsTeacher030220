@@ -137,14 +137,15 @@ server.on("request",async (req, res)=>{
             req.on("data",(p)=>{postQuery+=p;});
             req.on("end",async ()=>{
                 const postPs=querystring.parse(postQuery);
-                for(let key in postPs){ //"" => null
+                for(let key in postPs){ //input value="" => null 값을 기대하지만 문자열 공백이 온다.(mgr,deptno,comm=>null)
                     if(postPs[key].trim()==="")postPs[key]=null;
                 }
                 let sql=`INSERT INTO EMP (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO) 
                                     VALUE (?,?,?,?,NOW(),?,?,?)`;
                 let insert=0;
                 try {
-                    const [result]=await pool.execute(sql, [postPs.empno,postPs.ename,postPs.job,postPs.mgr,postPs.sal,postPs.comm,postPs.deptno]);
+                    const [result]=await pool.execute(sql,
+                        [postPs.empno,postPs.ename,postPs.job,postPs.mgr,postPs.sal,postPs.comm,postPs.deptno]);
                     insert=result.affectedRows;
                 }catch (e) {
                     console.error(e)
@@ -157,6 +158,25 @@ server.on("request",async (req, res)=>{
                     res.end();
                 }
             });//4시 15분까지 쉬었다 삭제하고 나머지 자습~ dept crud
+        }else if(urlObj.pathname==="/empDelete.do"){ //삭제 액션 페이지
+            let empno=Number(params.empno);
+            //400처리 해보세요~
+            let sql="DELETE FROM EMP WHERE EMPNO=?";
+            let del=0;  //delete 필드를 삭제하는 연산자 예약어
+            try {
+                const [result]=await pool.execute(sql,[empno]);
+                del=result.affectedRows;
+            }catch (e) {
+                console.error(e)
+            }
+            if(del>0){
+                res.writeHead(302,{location:"/empList.do"});
+                res.end();
+            }else {
+                res.writeHead(302,{location:"/empUpdate.do?empno="+params.empno});
+                res.end();
+            }
+
         }else{
             res.statusCode=404;
             res.setHeader("content-type","text/html;charset=UTF-8")
