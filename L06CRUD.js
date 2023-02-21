@@ -97,6 +97,37 @@ server.on("request",async (req, res)=>{
             let html=pug.renderFile("./templates/empUpdate.pug",{emp:rows[0]});
             res.write(html);
             res.end();
+        }else if(urlObj.pathname==="/empUpdate.do"&&req.method==="POST"){
+            //data 를 수정한는 동적리소스 (액션페이지)
+            //dml을 실행할때는 오류가 종종 발생하기 때문에 꼭 예외처리를 하세요!
+            //querystring 은 url 에 오는 파라미터만 객체로 파싱중
+            //post 로 오는 파라미터는 요청해더의 본문을 해석해서 받아와야한다.
+            let postquery="";
+            let update=0; //0이면 실패 1이면 성공
+            req.on("data",(param)=>{
+                postquery+=param;
+            });//요청해더의 문서을 읽는 이벤트 (post 로 넘긴 querystring 불러오기)
+            req.on("end",async ()=>{
+                console.log(postquery);
+                const postPs=querystring.parse(postquery);
+                try {
+                    let sql=`UPDATE EMP SET ENAME=?,SAL=?,COMM=?,JOB=?,MGR=?,DEPTNO=? WHERE EMPNO=?`
+                    const [result]=await pool.execute(sql,[postPs.ename, postPs.sal, postPs.comm, postPs.job, postPs.mgr, postPs.deptno, postPs.empno]) //DML
+                    console.log(result);
+                    update=result.affectedRows;
+                }catch (e) {
+                    console.error(e);
+                }
+                //오류없이 잘실행되고 update 도 잘되면 update=1
+                if(update>0){
+                    //302 : redirect 이페이지가 응답하지 않고 다른 페이지가 응답하도록 서버 내부에서 요청
+                    res.writeHead(302,{location:"/empDetail.do?empno="+postPs.empno});
+                    res.end();
+                }else{
+                    res.writeHead(302,{location:"/empUpdate.do?empno="+postPs.empno});
+                    res.end();
+                }//20분까지 쉬었다가 와서 삭제하고 등록해보겠습니다.
+            });//요청해더의 문서을 모두 다 읽으면 발생하는 이벤트
         }else{
             res.statusCode=404;
             res.setHeader("content-type","text/html;charset=UTF-8")
