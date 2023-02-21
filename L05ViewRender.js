@@ -18,8 +18,11 @@ server.listen(8888,()=>{
     console.log("http://localhost:8888 에 서버가 열림");
 });
 server.on("request",async (req, res)=>{
+    //프로그래머 1 2 3 4 5 6 7 8 9 10
     const urlObj=url.parse(req.url);
     const params=querystring.parse(urlObj.query);
+    res.setHeader("content-type","text/html;charset=UTF-8");
+
     if(urlObj.pathname==="/"){
         let data=await fs.readFile("L05Index.html");
         res.write(data);
@@ -45,7 +48,6 @@ server.on("request",async (req, res)=>{
         }catch (e) {
             console.error(e)
         }
-        res.setHeader("content-type","text/html;charset=UTF-8;");
         res.write("<h1>model1 은 한페이지를 3명의 개발자(dba,backend,frontend)가 다 같이 작업합니다! 지옥!</h1>");
         res.write("<h2>동적페이지에서 html 을 렌더하면 프로트엔드 개발자가 회사를 그만둘 수 있다~ </h2>");
     }else if(urlObj.pathname==="/deptList.do"){
@@ -66,7 +68,6 @@ server.on("request",async (req, res)=>{
             res.end();
         }catch (e) {
             console.error(e);
-            res.setHeader("content-type","text/html;charset=UTF-8")
             res.statusCode=500;
             res.write("<h1>db나 렌더링에서 오류가 발생했습니다.다시 시도 500</h1>");
             res.end();
@@ -81,7 +82,6 @@ server.on("request",async (req, res)=>{
             res.end();
         }catch (e) {
             console.error(e);
-            res.setHeader("content-type","text/html;charset=UTF-8")
             res.statusCode=500;
             res.write("<h1>db나 렌더링에서 오류가 발생했습니다.다시 시도 500</h1>");
             res.end();
@@ -92,9 +92,7 @@ server.on("request",async (req, res)=>{
         let html=pug.renderFile("L05EmpDetail.pug",{emp:rows[0]});
         res.write(html);
         res.end();
-    }else {
-
-        res.setHeader("content-type","text/html;charset=UTF-8")
+    }else{
         res.statusCode=404;
         res.write("<h1>404 존재하지 않는 리소스 입니다.</h1>");
         res.end();
