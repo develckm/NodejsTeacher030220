@@ -128,6 +128,35 @@ server.on("request",async (req, res)=>{
                     res.end();
                 }//20분까지 쉬었다가 와서 삭제하고 등록해보겠습니다.
             });//요청해더의 문서을 모두 다 읽으면 발생하는 이벤트
+        }else if(urlObj.pathname==="/empInsert.do"&&req.method==="GET"){//등록 form
+            let html=pug.renderFile("./templates/empInsert.pug");
+            res.write(html);
+            res.end();
+        }else if(urlObj.pathname==="/empInsert.do"&&req.method==="POST"){//등록 action
+            let postQuery=""
+            req.on("data",(p)=>{postQuery+=p;});
+            req.on("end",async ()=>{
+                const postPs=querystring.parse(postQuery);
+                for(let key in postPs){ //"" => null
+                    if(postPs[key].trim()==="")postPs[key]=null;
+                }
+                let sql=`INSERT INTO EMP (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO) 
+                                    VALUE (?,?,?,?,NOW(),?,?,?)`;
+                let insert=0;
+                try {
+                    const [result]=await pool.execute(sql, [postPs.empno,postPs.ename,postPs.job,postPs.mgr,postPs.sal,postPs.comm,postPs.deptno]);
+                    insert=result.affectedRows;
+                }catch (e) {
+                    console.error(e)
+                }
+                if(insert>0){
+                    res.writeHead(302,{location:"/empList.do"});
+                    res.end();
+                }else{
+                    res.writeHead(302,{location:"/empInsert.do"});
+                    res.end();
+                }
+            });//4시 15분까지 쉬었다 삭제하고 나머지 자습~ dept crud
         }else{
             res.statusCode=404;
             res.setHeader("content-type","text/html;charset=UTF-8")

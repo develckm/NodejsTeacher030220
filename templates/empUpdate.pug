@@ -4,11 +4,13 @@ html(lang="en")
         meta(charset="UTF-8")
         //link(rel="stylesheet" href="/public/css/empDetail.css")
     body
-        h1 사원 수정 폼 (Raed)
+        h1 사원 수정 폼 (Read)
         form(name="empUpdateForm",action="/empUpdate.do",method="POST")
             p
                 span 사번 :
-                input(value=emp.EMPNO,name="empno")
+                strong=emp.EMPNO
+                input(value=emp.EMPNO,name="empno",type="hidden")
+                //type="hidden" 보이지 않지만 넘어가는 파라미터
             p
                 span 이름 :
                 input(value=emp.ENAME,name="ename")
@@ -33,7 +35,7 @@ html(lang="en")
                 span 부서 :
                 input(value=emp.DEPTNO,name="deptno")
             p
-                a(href=`/empDelete.do?empno=${emp.EMPNO}`) 삭제
+                a(href=`/empDelete.do?empno=${emp.EMPNO}`) 삭제 &nbsp;
                 button(type="submit") 수정제출
 
         h2 http 통신에서 요청의 2가지 방식(method) GET 과 POST
