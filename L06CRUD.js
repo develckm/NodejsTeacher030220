@@ -8,7 +8,7 @@
 
 //create,alter,drop :
 // table 을 생성하거나 구주를 바꾸거나 삭제하는 명령어 (DDL)
-//update,delete,insert(DML),select(DQL) :
+//update,delete,insert(DML),select(DQL)
 // table 에 데이터를 추가하거나 삭제 또는 수정 조회 명령어
 //es6 부터는 var 사용을 권장하지 않는다. (변수 지역 전역 구분이 있어야하는데.. var 무조건 전역)
 const http=require("http");
@@ -282,7 +282,52 @@ server.on("request",async (req, res)=>{
                 res.writeHead(302,{location:"/deptUpdate.do?deptno="+params.deptno});
                 res.end();
             }
-
+        }else if(urlObj.pathname==="/empnoCheck.do"){
+            //empno가 동일한 사원이 있으면 true 없으면 false
+            if(!params.empno || isNaN(params.empno)){ //(null,undefined,"",0(x))=>false
+                res.statusCode=400; //이 동적페이지에 요청을 잘못했다.(꼭 필요한 파라미터가 없다.)
+                res.end();return;
+            }
+            let empno=parseInt(params.empno);
+            const resObj={checkId:false,emp:null}; //Object 문자열로 응답하는 JSON 이라 부른다.
+            let sql="SELECT * FROM EMP WHERE EMPNO=?";
+            try {
+                const [rows,f]=await pool.query(sql,[empno]);
+                if(rows.length>0){
+                    resObj.checkId=true;
+                    resObj.emp=rows[0]
+                }
+            }catch (e) {
+                console.error(e); //오류가 발생하면 500 (서버에서 발생하는 오류)
+                res.statusCode=500;
+                res.end();return;
+            }
+            res.setHeader("content-type","application/json;charset=UTF-8;"); //응답하는 문서형식
+            res.write(JSON.stringify(resObj));
+            res.end();
+        }else if(urlObj.pathname==="/deptnoCheck.do"){
+            //deptno 동일한 부서가 있으면 true 없으면 false
+            if(!params.deptno || isNaN(params.deptno)){
+                res.statusCode=400;
+                res.end();return;
+            }
+            let deptno=parseInt(params.deptno);
+            const resObj={checkId:false,dept:null};
+            let sql="SELECT * FROM DEPT WHERE DEPTNO=?";
+            try {
+                const [rows,f]=await pool.query(sql,[deptno]);
+                if(rows.length>0){
+                    resObj.checkId=true;
+                    resObj.dept=rows[0]
+                }
+            }catch (e) {
+                console.error(e);
+                res.statusCode=500;
+                res.end();return;
+            }
+            res.setHeader("content-type","application/json;charset=UTF-8;");
+            res.write(JSON.stringify(resObj));
+            res.end();
         }else{
             res.statusCode=404;
             res.setHeader("content-type","text/html;charset=UTF-8")

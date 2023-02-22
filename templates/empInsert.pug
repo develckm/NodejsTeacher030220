@@ -2,15 +2,30 @@ html(lang="en")
     head
         title SCOTT.emp CRUD
         meta(charset="UTF-8")
+        script(src="/public/js/empInsert.js", defer=true )
+        style.
+            .inputCont.error{
+                color: darkred;
+            }
+            .inputCont.success {
+                color: seagreen;
+            }
+            .inputCont.success input{
+                border-color: seagreen;
+            }
+            .inputCont.error input{
+                border-color: darkred;
+            }
+
+
     body
         h1 사원 등록 폼
         form(name="empInsertForm",action="/empInsert.do",method="POST")
-            p
-                span 사번 :
-                input(value="",name="empno")
-                //ajax 로 사번 중복 체크
-            .script
-
+            div.inputCont
+                p
+                    span 사번 :
+                    input(value="",name="empno")
+                p#empnoMsg
             p
                 span 이름 :
                 input(value="",name="ename")
@@ -25,12 +40,19 @@ html(lang="en")
                 input(value="",name="comm")
             p
                 span 입사일 : mysql.now()
+            div.inputCont
+                p
+                    span 상사 :
+                    input(value="",name="mgr")
+                p#mgrMsg /empnoCheck.do 로 참조가능한 상사!
+            div.inputCont
+                p
+                    span 부서 :
+                    input(value="",name="deptno")
+                p#deptnoMsg /deptnoCheck.do 로 참조가능한 부서번호!
 
             p
-                span 상사 :
-                input(value="",name="mgr")
-            p
-                span 부서 :
-                input(value="",name="deptno")
-            p
                 button(type="submit") 등록제출
+        //script.
+            //script. 하위 요소로 인지하지 않겠다.
+            console.log(empInsertForm.empno);
