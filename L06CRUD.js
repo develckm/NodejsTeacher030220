@@ -170,6 +170,7 @@ server.on("request",async (req, res)=>{
             });//4시 15분까지 쉬었다 삭제하고 나머지 자습~ dept crud
         }else if(urlObj.pathname==="/empDelete.do"){ //삭제 액션 페이지
             let empno=Number(params.empno);
+            console.log(empno);
             //400처리 해보세요~
             let sql="DELETE FROM EMP WHERE EMPNO=?";
             let del=0;  //delete 필드를 삭제하는 연산자 예약어
@@ -187,6 +188,101 @@ server.on("request",async (req, res)=>{
                 res.end();
             }
 
+        }else if(urlObj.pathname==="/deptList.do"){
+            let sql="SELECT * FROM DEPT";
+            const [rows,f]=await pool.query(sql);
+            let html=pug.renderFile("./templates/deptList.pug",{deptList:rows})
+            res.write(html);
+            res.end();
+        }else if(urlObj.pathname==="/deptDetail.do"){
+            if(params.deptno==null || isNaN(params.deptno)){
+                new ErrorPage().set400Page(res); return;
+            }
+            let deptno=Number(params.deptno);
+            let sql="SELECT * FROM DEPT WHERE DEPTNO=?";
+            const [rows,f]=await pool.query(sql,[deptno]);
+            if(rows.length===0){ //조회된 부서가 없을 때
+                res.writeHead("302",{location:"/deptList.do"});
+                res.end();return;
+            }
+            let html=pug.renderFile("./templates/deptDetail.pug",{dept:rows[0]})
+            res.write(html);
+            res.end();
+        }else if(urlObj.pathname==="/deptUpdate.do" && req.method==="GET"){
+            if(params.deptno==null || isNaN(params.deptno)){
+                new ErrorPage().set400Page(res); return;
+            }
+            let deptno=Number(params.deptno);
+            let sql="SELECT * FROM DEPT WHERE DEPTNO=?";
+            const [rows,f]=await pool.query(sql,[deptno]);
+            if(rows.length===0){ //조회된 부서가 없을 때
+                res.writeHead("302",{location:"/deptList.do"});
+                res.end();return;
+            }
+            let html=pug.renderFile("./templates/deptUpdate.pug",{dept:rows[0]})
+            res.write(html);
+            res.end();
+        }else if(urlObj.pathname==="/deptUpdate.do" && req.method==="POST"){
+            let postQuery=await postDataPromise(req);
+            let params=querystring.parse(postQuery);
+            let sql="UPDATE DEPT SET DNAME=?,LOC=? WHERE DEPTNO=?";
+            let update=0;
+            try {
+                const [result]=await pool.execute(sql,[params.dname,params.loc,params.deptno]);
+                update=result.affectedRows;
+            }catch (e) {
+                console.error(e);
+            }
+            if(update>0){
+                res.writeHead(302,{location:"/deptDetail.do?deptno="+params.deptno});
+                res.end();
+            }else{
+                res.writeHead(302,{location:"/deptUpdate.do?deptno="+params.deptno});
+                res.end();
+            }
+        }else if(urlObj.pathname==="/deptInsert.do" && req.method==="GET"){
+            let html=pug.renderFile("./templates/deptInsert.pug")
+            res.write(html);
+            res.end();
+        }else if(urlObj.pathname==="/deptInsert.do" && req.method==="POST"){
+            let postQuery=await postDataPromise(req);
+            let params=querystring.parse(postQuery);
+            let sql="INSERT INTO DEPT (DEPTNO, DNAME, LOC) VALUE (?,?,?)";
+            let insert=0;
+            try {
+                const [result]=await pool.execute(sql,[params.deptno,params.dname,params.loc]);
+                insert=result.affectedRows;
+            }catch (e) {
+                console.error(e);
+            }
+            if(insert>0){
+                res.writeHead(302,{location:"/deptList.do"});
+                res.end();
+            }else{
+                res.writeHead(302,{location:"/deptInsert.do"});
+                res.end();
+            }
+        }else if(urlObj.pathname==="/deptDelete.do"){
+            if(params.deptno==null || isNaN(params.deptno)){
+                new ErrorPage().set400Page(res);
+                return;
+            }
+            let deptno=Number(params.deptno);
+            let sql="DELETE FROM DEPT WHERE DEPTNO=?";
+            let del=0;
+            try {
+                const [result]=await pool.execute(sql,[deptno]);
+            }catch (e) {
+                console.error(e);
+            }
+            if(del>0){
+                res.writeHead(302,{location:"/deptList.do"});
+                res.end();
+            }else{
+                res.writeHead(302,{location:"/deptUpdate.do?deptno="+params.deptno});
+                res.end();
+            }
+
         }else{
             res.statusCode=404;
             res.setHeader("content-type","text/html;charset=UTF-8")
@@ -195,3 +291,48 @@ server.on("request",async (req, res)=>{
         }
     }
 });
+function ErrorPage(){
+    this.set400Page=(res)=>{
+        res.statusCode=400;
+        res.write("<h1>해당 페이지 꼭 필요한 파라미터를 보내지 않았습니다! 400</h1>");
+        res.end();
+    }
+}
+function postDataPromise(request){
+    let postQuery="";
+    return new Promise((resolve,reject)=>{
+        request.on("data",(param)=>{
+            postQuery+=param;
+        });
+        request.on("end",()=>{
+            resolve(postQuery);
+        })
+    });
+}
+
+
+
+//절대 경로
+// 예) c:// ~~~
+// 예) http://
+// http 에 공개키라는 보안키가 추가되면 https
+
+//상대 경로
+// "/" root 기준으로 하는 상대경로
+// 예) c://a/b/c/d.html "/z.html" => c://z.html
+// 예) c://user/경민/c/d.html "/z.html" => c://user/경민/z.html (mac)
+
+// 예) http://naver.com/a/b/c/d.html   "/z.html" => http://naver.com/z.html
+// "." or "./" 현재 폴더를 기준으로 하는 상대경로
+// 예) http://naver.com/a/b/c/d.html   "./a.html"=>http://naver.com/a/b/c/a.html
+
+
+
+
+
+
+
+
+
+
+

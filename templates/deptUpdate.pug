@@ -1,0 +1,22 @@
+html(lang="en")
+    head
+        title SCOTT.dept CRUD
+        meta(charset="UTF-8")
+        //link(rel="stylesheet" href="/public/css/empDetail.css")
+    body
+        h1 부서 수정 폼 (Read)
+        form(name="deptUpdateForm",action="/deptUpdate.do",method="POST")
+            p
+                span 사번 :
+                strong=dept.DEPTNO
+                input(value=dept.DEPTNO,name="deptno",type="hidden")
+            p
+                span 이름 :
+                input(value=dept.DNAME,name="dname")
+            p
+                span 부서 :
+                input(value=dept.LOC,name="loc")
+            p
+                a(href=`/deptDelete.do?deptno=${dept.DEPTNO}`) 삭제 &nbsp;
+                button(type="submit") 수정제출
+

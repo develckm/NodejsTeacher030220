@@ -1,0 +1,18 @@
+html(lang="en")
+    head
+        title SCOTT.dept CRUD
+        meta(charset="UTF-8")
+    body
+        h1 부서 상세 정보 (Raed)
+        div
+            p
+                span 부서번호 :
+                strong=dept.DEPTNO
+            p
+                span 부서이름 :
+                strong=dept.DNAME
+            p
+                span 부서위치 :
+                strong=dept.LOC
+            p
+                a(href=`/deptUpdate.do?deptno=${dept.DEPTNO}`) 수정폼
