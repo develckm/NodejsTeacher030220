@@ -131,7 +131,7 @@ server.on("request",async (req, res)=>{
                         (!postPs.deptno.trim())? null : Number(postPs.deptno),
                         postPs.hiredate,
                         Number(postPs.empno)
-                    ])
+                    ])//11시까지 쉬었따~ 유효성검사~
                     console.log(result);
                     update=result.affectedRows;
                 }catch (e) {

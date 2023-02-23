@@ -32,18 +32,26 @@ html(lang="en")
                     span 사번 :
                     input(value="",name="empno")
                 p#empnoMsg
-            p
-                span 이름 :
-                input(value="",name="ename")
-            p
-                span 직책 :
-                input(value="",name="job")
-            p
-                span 급여 :
-                input(value="", name="sal")
-            p
-                span 상여급 :
-                input(value="", name="comm")
+            div.inputCont
+                p
+                    span 이름 :
+                    input(value="",name="ename")
+                p#enameMsg
+            div.inputCont
+                p
+                    span 직책 :
+                    input(value="",name="job")
+                p#jobMsg
+            div.inputCont
+                p
+                    span 급여 :
+                    input(value="", name="sal")
+                p#salMsg
+            div.inputCont
+                p
+                    span 상여급 :
+                    input(value="", name="comm")
+                p#commMsg
             p
                 span 입사일 :
                 -const now=new Date()
@@ -59,13 +67,12 @@ html(lang="en")
                 p
                     span 상사 :
                     input(value="", name="mgr")
-                p#mgrMsg /empnoCheck.do 로 참조가능한 상사!
+                p#mgrMsg
             div.inputCont
                 p
                     span 부서 :
                     input(value="",name="deptno")
-                p#deptnoMsg /deptnoCheck.do 로 참조가능한 부서번호!
-
+                p#deptnoMsg
             p
                 button(type="submit") 등록제출
         //script.
