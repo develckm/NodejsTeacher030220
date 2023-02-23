@@ -121,8 +121,17 @@ server.on("request",async (req, res)=>{
                 console.log(postquery);
                 const postPs=querystring.parse(postquery);
                 try {
-                    let sql=`UPDATE EMP SET ENAME=?,SAL=?,COMM=?,JOB=?,MGR=?,DEPTNO=? WHERE EMPNO=?`
-                    const [result]=await pool.execute(sql,[postPs.ename, postPs.sal, postPs.comm, postPs.job, postPs.mgr, postPs.deptno, postPs.empno]) //DML
+                    let sql=`UPDATE EMP SET ENAME=?,SAL=?,COMM=?,JOB=?,MGR=?,DEPTNO=?,HIREDATE=? WHERE EMPNO=?`
+                    const [result]=await pool.execute(sql,[
+                        postPs.ename,
+                        (!postPs.sal.trim())?null:Number(postPs.sal),
+                        (!postPs.comm.trim())?null:Number(postPs.comm),
+                        postPs.job,
+                        (!postPs.mgr.trim())? null : Number(postPs.mgr),
+                        (!postPs.deptno.trim())? null : Number(postPs.deptno),
+                        postPs.hiredate,
+                        Number(postPs.empno)
+                    ])
                     console.log(result);
                     update=result.affectedRows;
                 }catch (e) {
@@ -151,11 +160,21 @@ server.on("request",async (req, res)=>{
                     if(postPs[key].trim()==="")postPs[key]=null;
                 }
                 let sql=`INSERT INTO EMP (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO) 
-                                    VALUE (?,?,?,?,NOW(),?,?,?)`;
+                                    VALUE (?,?,?,?,?,?,?,?)`;
                 let insert=0;
+
                 try {
                     const [result]=await pool.execute(sql,
-                        [postPs.empno,postPs.ename,postPs.job,postPs.mgr,postPs.sal,postPs.comm,postPs.deptno]);
+                        [
+                            postPs.empno,
+                            postPs.ename,
+                            postPs.job,
+                            postPs.mgr,
+                            postPs.hiredate,
+                            postPs.sal,
+                            postPs.comm,
+                            postPs.deptno
+                        ]);
                     insert=result.affectedRows;
                 }catch (e) {
                     console.error(e)

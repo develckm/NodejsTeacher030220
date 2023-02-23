@@ -23,11 +23,17 @@ html(lang="en")
             p
                 span 상여급 :
                 input(value=emp.COMM,name="comm")
+                -let y=emp.HIREDATE.getUTCFullYear();
+                -let m=emp.HIREDATE.getUTCMonth()+1;
+                -m=(m<10)?`0${m}`:m;
+                -let d=emp.HIREDATE.getUTCDate();
+                -d=(d<10)?`0${d}`:d;
             p
                 span 입사일 :
-                input(value=emp.HIREDATE,name="hiredate" type="date")
+                input(value=`${y}-${m}-${d}` ,name="hiredate", type="date")
+                //emp.HIREDATE type Date : mysql Hiredate 의 값을 js의 Date로 파싱
                 //type=date value : yyyy-MM-dd
-                ///type=datetime value : yyyy-MM-dd HH:mm
+                ///type=datetime value : yyyy-MM-dd'T'HH:mm
             p
                 span 상사 :
                 input(value=emp.MGR,name="mgr")
